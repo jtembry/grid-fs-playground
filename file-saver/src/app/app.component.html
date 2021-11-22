@@ -1,0 +1,10 @@
+<h2>Download File</h2>
+<div *ngFor="let file of file$ | async">
+  <a (click)="download(file.filename)">
+    {{file.filename}}
+  </a>
+</div>
+<hr />
+<app-uploader></app-uploader>
+<hr />
+<app-messages></app-messages>
