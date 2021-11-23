@@ -30,7 +30,6 @@ export class AppService {
 
   getAllFiles(selected: any) {
     const params = new HttpParams({ fromObject: { 'fileType': selected}});
-    console.log('params', params)
     return this.http.get(`${environment.apiUrl}/files`, {params: params})
     .subscribe(c => this._files.next(c))
   }

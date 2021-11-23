@@ -43,7 +43,6 @@ export class AppController {
     @Body() body: SampleDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log('file', file)
       return {
         body,
         response_id: await this.appService.saveFile(file)
