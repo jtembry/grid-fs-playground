@@ -3,8 +3,10 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Param,
   Post,
+  Query,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -17,17 +19,20 @@ import { Multer } from 'multer';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly logger: Logger
+    ) {}
 
   @Get('files')
-  async getAllFiles(){
-    const files = this.appService.getAllFiles();
+  async getAllFiles(@Query() qp: string){
+    this.logger.log(`Filtering on: ${qp['fileType']}`)
+    const files = this.appService.getAllFiles(qp['fileType']);
     return files;
   }
 
   @Get(':id')
   async getFile(@Param() params) {
-    console.log('params', params.id)
     const file = this.appService.getFile(params.id);
     return file
   }

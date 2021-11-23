@@ -6,6 +6,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { UploaderComponent } from './uploader/uploader.component';
 import { MessagesComponent } from './messages/messages.component'
 import { MessageService } from './message.service';
+import { MaterialExampleModule } from './material.module';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,8 @@ import { MessageService } from './message.service';
   imports: [
     BrowserModule,
     HttpClientModule,
+    MaterialExampleModule,
+    NoopAnimationsModule
   ],
   providers: [AppService, MessageService],
   bootstrap: [AppComponent]

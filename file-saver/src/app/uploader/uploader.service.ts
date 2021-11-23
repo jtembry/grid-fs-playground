@@ -56,7 +56,7 @@ export class UploaderService {
         return `File "${file.name}" is ${percentDone}% uploaded.`;
 
       case HttpEventType.Response:
-        this.service.getAllFiles()
+        this.service.getAllFiles('')
         return `File "${file.name}" was completely uploaded!`;
 
       default:

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -28,8 +28,10 @@ export class AppService {
   }
 
 
-  getAllFiles() {
-    return this.http.get(`${environment.apiUrl}/files`)
+  getAllFiles(selected: any) {
+    const params = new HttpParams({ fromObject: { 'fileType': selected}});
+    console.log('params', params)
+    return this.http.get(`${environment.apiUrl}/files`, {params: params})
     .subscribe(c => this._files.next(c))
   }
 

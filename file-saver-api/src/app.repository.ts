@@ -14,7 +14,7 @@ export class AppRepository {
     @InjectConnection() private connection: Connection
     ){}
 
-    public async saveFile(fileName: string, data: string): Promise<string> {
+    public async saveFile(fileName: string, data: string, mimeType: string): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             // read utf-8 string to buffer
             const buffer = Buffer.from(data, "utf-8");
@@ -30,7 +30,7 @@ export class AppRepository {
             });
             // write data to grid fs
             stream
-                .pipe(gridFsBucket.openUploadStream(fileName, {}))
+                .pipe(gridFsBucket.openUploadStream(fileName, {metadata: {'mimeType': mimeType}}))
                 .on("finish", (resp: any) => {
                     resolve(resp._id.toHexString());
                 })
@@ -47,6 +47,13 @@ export class AppRepository {
                 bucketName: MONGO_BUCKET,
             });
 
+            // const metadata = dbHandle.files.find( { filename: name} )
+        
+            const metadata = await gridFsBucket.find({
+                    filename: name,
+                    metadata:{ $exists: true }})
+                .toArray()
+    
             // hold base64 string
             let data = "";
             // create writable stream that will append to data the chunks from gridfs.
@@ -59,10 +66,10 @@ export class AppRepository {
             const file = gridFsBucket.openDownloadStreamByName(name)
             .pipe(writableStream)
             .on("finish", () => {
-                console.log('data out', data)
                 resolve({
                     fileName: name,
                     fileData: data,
+                    metaData: metadata?.pop()?.metadata
                 });
             })
             .on("error", (err) => {
@@ -71,13 +78,14 @@ export class AppRepository {
     });
     }
 
-    public async getAllFiles(): Promise<Array<any>> {
+    public async getAllFiles(fileType: string): Promise<Array<any>> {
         return new Promise<Array<any>>(async (resolve, reject) => {
             const dbHandle = this.connection.db
             const gridFsBucket = new GridFSBucket(dbHandle, {
                 bucketName: MONGO_BUCKET,
             });
-            const cursor = gridFsBucket.find({})
+            const filter = fileType !== '' ? {mimeType: fileType} : {$exists: true}
+            const cursor = gridFsBucket.find({metadata: filter})
             resolve(cursor.toArray())
         });
     }

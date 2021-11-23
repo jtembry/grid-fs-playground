@@ -1,9 +1,34 @@
 <h2>Download File</h2>
-<div *ngFor="let file of file$ | async">
-  <a (click)="download(file.filename)">
-    {{file.filename}}
-  </a>
-</div>
+<br>
+<mat-form-field appearance="fill">
+  <mat-label>Filter by Type</mat-label>
+  <mat-select (selectionChange)="onSelect($event.value)">
+    <div *ngFor="let item of mimeTypes | keyvalue">
+      <mat-option [value]="item.value">{{ item.key }}</mat-option>
+    </div>
+  </mat-select>
+</mat-form-field>
+<br>
+<table mat-table [dataSource]="file$ | async" class="mat-elevation-z8">
+
+  <!--- Note that these columns can be defined in any order.
+        The actual rendered columns are set as a property on the row definition" -->
+
+  <!-- File Name -->
+  <ng-container matColumnDef="filename">
+    <th mat-header-cell *matHeaderCellDef>Name</th>
+    <td mat-cell *matCellDef="let element"><a (click)="download(element.filename)">{{element.filename}}</a></td>
+  </ng-container>
+
+  <!-- File Type -->
+  <ng-container matColumnDef="filetype">
+    <th mat-header-cell *matHeaderCellDef>Type</th>
+    <td mat-cell *matCellDef="let element"> {{element.metadata.mimeType}} </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
 <hr />
 <app-uploader></app-uploader>
 <hr />
