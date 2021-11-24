@@ -8,18 +8,22 @@ import { MessagesComponent } from './messages/messages.component'
 import { MessageService } from './message.service';
 import { MaterialExampleModule } from './material.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ParsePipe } from './parse.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
     UploaderComponent,
-    MessagesComponent
+    MessagesComponent,
+    ParsePipe,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     MaterialExampleModule,
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    ReactiveFormsModule
   ],
   providers: [AppService, MessageService],
   bootstrap: [AppComponent]

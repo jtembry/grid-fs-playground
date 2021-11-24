@@ -19,18 +19,11 @@ export class UploaderService {
     private service: AppService
     ) {}
 
-  // If uploading multiple files, change to:
-  // upload(files: FileList) {
-  //   const formData = new FormData();
-  //   files.forEach(f => formData.append(f.name, f));
-  //   new HttpRequest('POST', '/upload/file', formData, {reportProgress: true});
-  //   ...
-  // }
-
-  upload(file: File) {
+  upload(file: File, tags: string[]) {
     if (!file) { return of<string>(); }
     let formData = new FormData();
     formData.append("file", file, file.name);
+    formData.append("tags", JSON.stringify(tags))
     const req = new HttpRequest('POST', `${environment.apiUrl}/upload`, formData, {
       reportProgress: true
     });

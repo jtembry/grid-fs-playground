@@ -14,13 +14,14 @@ export class AppRepository {
     @InjectConnection() private connection: Connection
     ){}
 
-    public async saveFile(fileName: string, data: string, mimeType: string): Promise<string> {
+    public async saveFile(fileName: string, data: string, mimeType: string, tags: []): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
             // read utf-8 string to buffer
-            const buffer = Buffer.from(data, "utf-8");
+            // const buffer = Buffer.from(data, "utf-8");
             const stream = new Readable();
             // convert buffer to binary string and write to readable stream
-            stream.push(buffer.toString("binary"));
+            // stream.push(buffer.toString("binary"));
+            stream.push(data);
             stream.push(null);
 
             // open stream to grid fs bucket
@@ -30,7 +31,14 @@ export class AppRepository {
             });
             // write data to grid fs
             stream
-                .pipe(gridFsBucket.openUploadStream(fileName, {metadata: {'mimeType': mimeType}}))
+                .pipe(gridFsBucket.openUploadStream(fileName, 
+                    { 
+                        metadata: {
+                            'mimeType': mimeType,
+                            'tags': tags
+                        }
+                    }
+                ))
                 .on("finish", (resp: any) => {
                     resolve(resp._id.toHexString());
                 })
@@ -59,7 +67,8 @@ export class AppRepository {
             // create writable stream that will append to data the chunks from gridfs.
             const writableStream = new Writable({
                 write(chunk, _encoding, callback) {
-                    data += chunk.toString("utf-8");
+                    // data += chunk.toString("utf-8");
+                    data += chunk
                     callback();
                 },
             });
@@ -84,8 +93,7 @@ export class AppRepository {
             const gridFsBucket = new GridFSBucket(dbHandle, {
                 bucketName: MONGO_BUCKET,
             });
-            const filter = fileType !== '' ? {mimeType: fileType} : {$exists: true}
-            const cursor = gridFsBucket.find({metadata: filter})
+            const cursor = gridFsBucket.find({})
             resolve(cursor.toArray())
         });
     }

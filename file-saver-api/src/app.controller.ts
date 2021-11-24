@@ -44,8 +44,7 @@ export class AppController {
     @UploadedFile() file: Express.Multer.File,
   ) {
       return {
-        body,
-        response_id: await this.appService.saveFile(file)
+        response: await this.appService.saveFile(file, body)
   }
 }
 }

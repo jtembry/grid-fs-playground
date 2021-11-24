@@ -13,12 +13,10 @@ export class AppService {
   }
 
   async getFile(name) {
-    this.logger.log('Retrieving: ', name)
     return await this.appRepository.getFile(name)
   }
 
-  async saveFile(file) {
-    this.logger.log('Saving: ', file)
-    return await this.appRepository.saveFile(file.originalname, file.buffer.toString(), file.mimetype)
+  async saveFile(file, body) {
+    return await this.appRepository.saveFile(file.originalname, file.buffer, file.mimetype, body.tags)
   }
 }

@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PipeTransform } from '@angular/core';
 import { KeyValue } from '@angular/common';
 import { AppService } from './app.service';
 import { MessageService } from './message.service';
-import { map } from 'rxjs/operators';
-
+import {} from 'rxjs/operators';
+import { MatTableDataSource } from '@angular/material/table';
 
 
 @Component({
@@ -19,7 +19,8 @@ export class AppComponent implements OnInit {
 
   }
   public file$ = this.service.files
-  displayedColumns: string[] = ['filename','filetype'];
+  dataSource: any
+  displayedColumns: string[] = ['filename','filetype','tags'];
   title = 'file-saver';
   contents: any;
   mimeTypes = {
@@ -103,6 +104,20 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.service.getAllFiles('')
+
+    this.service.files.subscribe(d => {
+        const data: any[] | undefined = []
+        d.forEach((f: any) => {
+            data.push(
+            {
+              filename: f.filename,
+              mimeType: f.metadata.mimeType ??= '',
+              tags: f.metadata.tags ??= ''
+            })
+        })
+      this.dataSource = new MatTableDataSource(data)
+
+    })
   }
 
   onSelect(selected: any) {
@@ -117,6 +132,10 @@ export class AppComponent implements OnInit {
     this.service.getFile(filename).subscribe(response => this.downLoadFile(response));
   }
 
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
 
   /**
    * Method is use to download file.

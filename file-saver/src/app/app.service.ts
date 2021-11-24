@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 
-import { tap } from 'rxjs/operators';
+import { map, mergeMap, switchMap, tap, toArray } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { MessageService } from './message.service';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class AppService {
@@ -31,10 +31,9 @@ export class AppService {
   getAllFiles(selected: any) {
     const params = new HttpParams({ fromObject: { 'fileType': selected}});
     return this.http.get(`${environment.apiUrl}/files`, {params: params})
-    .subscribe(c => this._files.next(c))
+    .subscribe(c => {
+      this._files.next(c)})
   }
-
-
 
   private log(filename: string, data: any) {
     const message = `DownloaderService downloaded "${filename}" and got "${data}".`;
