@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { createReadStream, createWriteStream } from "fs";
 import { MongoError, GridFSBucket, ObjectId } from "mongodb";
@@ -11,19 +11,16 @@ export const MONGO_BUCKET = "bucket";
 @Injectable()
 export class AppRepository {
     constructor(
-    @InjectConnection() private connection: Connection
+    @InjectConnection() private connection: Connection,
+    private logger: Logger
     ){}
 
-    public async saveFile(fileName: string, data: string, mimeType: string, tags: []): Promise<string> {
+    public async saveFile(file, tags: []): Promise<string> {
         return new Promise<string>(async (resolve, reject) => {
-            // read utf-8 string to buffer
-            // const buffer = Buffer.from(data, "utf-8");
             const stream = new Readable();
-            // convert buffer to binary string and write to readable stream
-            // stream.push(buffer.toString("binary"));
-            stream.push(data);
+            stream.push(file.buffer);
             stream.push(null);
-
+            
             // open stream to grid fs bucket
             const dbHandle = this.connection.db
             const gridFsBucket = new GridFSBucket(dbHandle, {
@@ -31,10 +28,10 @@ export class AppRepository {
             });
             // write data to grid fs
             stream
-                .pipe(gridFsBucket.openUploadStream(fileName, 
+                .pipe(gridFsBucket.openUploadStream(file.originalname, 
                     { 
                         metadata: {
-                            'mimeType': mimeType,
+                            'mimeType': file.mimetype,
                             'tags': tags
                         }
                     }
@@ -55,19 +52,16 @@ export class AppRepository {
                 bucketName: MONGO_BUCKET,
             });
 
-            const writableStream = new Writable({
-                write(chunk, _encoding, callback) {
-                    // data += chunk.toString("utf-8");
-                    data += chunk
-                    callback();
-                },
-            });
-        
-     
             // hold base64 string
             let data = "";
             // create writable stream that will append to data the chunks from gridfs.
- 
+            const writableStream = new Writable({
+                write(chunk, _encoding, callback) {
+                    data += chunk.toString("base64");
+                    callback();
+                },
+            });
+     
             const openDowloadStream = (file) => {
                 gridFsBucket.openDownloadStream(file._id)
                 .pipe(writableStream)

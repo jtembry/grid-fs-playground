@@ -144,8 +144,28 @@ export class AppComponent implements OnInit {
    * @param type - type of the document.
    */
   downLoadFile(data: any) {
-      console.log(data)
-      let url = window.URL.createObjectURL(new Blob([data.fileData]));
+    const b64toBlob = (b64Data: string, contentType='', sliceSize=512) => {
+      const byteCharacters = atob(b64Data);
+      const byteArrays = [];
+
+      for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+
+      const blob = new Blob(byteArrays, {type: contentType});
+      return blob;
+    }
+
+    const blob = b64toBlob(data.fileData, data.metaData.mimeType)
+      let url = window.URL.createObjectURL(blob);
       let pwa = window.open(url);
       if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
           alert( 'Please disable your Pop-up blocker and try again.');

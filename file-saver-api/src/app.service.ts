@@ -17,6 +17,6 @@ export class AppService {
   }
 
   async saveFile(file, body) {
-    return await this.appRepository.saveFile(file.originalname, file.buffer, file.mimetype, body.tags)
+    return await this.appRepository.saveFile(file, body.tags)
   }
 }

@@ -27,6 +27,7 @@ export class UploaderService {
     const req = new HttpRequest('POST', `${environment.apiUrl}/upload`, formData, {
       reportProgress: true
     });
+
     // The `HttpClient.request` API produces a raw event stream
     // which includes start (sent), progress, and response events.
     return this.http.request(req).pipe(
@@ -35,6 +36,7 @@ export class UploaderService {
       last(), // return last (completed) message to caller
       catchError(this.handleError(file))
     );
+    return of ('')
   }
 
   /** Return distinct message for sent, upload progress, & response events */

@@ -44,6 +44,12 @@ export class UploaderComponent {
 
   submit(){
     const file = this.myForm.get('fileSource')?.value
+    const reader = new FileReader();
+    reader.onload = function () {
+      console.log('reader', reader.result);
+    }
+    const fileread = reader.readAsDataURL(file)
+
     this.uploaderService.upload(file, this.tagList)
     .subscribe(
       msg => {
