@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
   }
   public file$ = this.service.files
   dataSource: any
-  displayedColumns: string[] = ['filename','filetype','tags'];
+  displayedColumns: string[] = ['filename','filetype','tags','uploadDate'];
   title = 'file-saver';
   contents: any;
   mimeTypes = {
@@ -112,7 +112,8 @@ export class AppComponent implements OnInit {
             {
               filename: f.filename,
               mimeType: f.metadata.mimeType ??= '',
-              tags: f.metadata.tags ??= ''
+              tags: f.metadata.tags ??= '',
+              uploadDate: f.uploadDate ??= ''
             })
         })
       this.dataSource = new MatTableDataSource(data)
@@ -128,8 +129,8 @@ export class AppComponent implements OnInit {
     this.contents = undefined;
   }
 
-  download(filename: string) {
-    this.service.getFile(filename).subscribe(response => this.downLoadFile(response));
+  download(filename: string, uploadDate: string) {
+    this.service.getFile(filename, uploadDate).subscribe(response => this.downLoadFile(response));
   }
 
   applyFilter(event: Event) {
@@ -143,6 +144,7 @@ export class AppComponent implements OnInit {
    * @param type - type of the document.
    */
   downLoadFile(data: any) {
+      console.log(data)
       let url = window.URL.createObjectURL(new Blob([data.fileData]));
       let pwa = window.open(url);
       if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {

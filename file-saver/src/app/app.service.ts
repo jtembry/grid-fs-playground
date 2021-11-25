@@ -16,13 +16,13 @@ export class AppService {
     private messageService: MessageService
   ) { }
 
-  getFile(filename: any) {
-    // console.log('test', filename)
-    return this.http.get(`${environment.apiUrl}/${filename}`)
+  getFile(fileName: any, uploadDate: any) {
+    const params = new HttpParams({ fromObject: { 'uploadDate': uploadDate}});
+    return this.http.get(`${environment.apiUrl}/${fileName}`, {params: params})
       .pipe(
         tap( // Log the result or error
-          data => this.log(filename, data),
-          error => this.logError(filename, error)
+          data => this.log(fileName, data),
+          error => this.logError(fileName, error)
         )
       );
   }

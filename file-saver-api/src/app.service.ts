@@ -12,8 +12,8 @@ export class AppService {
     return await this.appRepository.getAllFiles(fileType)
   }
 
-  async getFile(name) {
-    return await this.appRepository.getFile(name)
+  async getFile(fileName, uploadDate?) {
+    return await this.appRepository.getFile(fileName, uploadDate)
   }
 
   async saveFile(file, body) {

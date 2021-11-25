@@ -32,9 +32,13 @@ export class AppController {
   }
 
   @Get(':id')
-  async getFile(@Param() params) {
-    const file = this.appService.getFile(params.id);
-    return file
+  async getFile(
+    @Param() params,
+    @Query() qp: string
+    ) {
+    this.logger.log(`Filtering on: ${qp['uploadDate']}`)
+    return await this.appService.getFile(params.id, qp['uploadDate']);
+
   }
 
   @Post('upload')

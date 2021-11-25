@@ -40,7 +40,7 @@ export class AppRepository {
                     }
                 ))
                 .on("finish", (resp: any) => {
-                    resolve(resp._id.toHexString());
+                    resolve('success ' + resp._id.toHexString());
                 })
                 .on("error", (err) => {
                     reject(err);
@@ -48,23 +48,13 @@ export class AppRepository {
         });
     }
 
-    public async getFile(name): Promise<any> {
+    public async getFile(fileName, uploadDate?): Promise<any> {
         return new Promise<any>(async (resolve, reject) => {
             const dbHandle = this.connection.db
             const gridFsBucket = new GridFSBucket(dbHandle, {
                 bucketName: MONGO_BUCKET,
             });
 
-            // const metadata = dbHandle.files.find( { filename: name} )
-        
-            const metadata = await gridFsBucket.find({
-                    filename: name,
-                    metadata:{ $exists: true }})
-                .toArray()
-    
-            // hold base64 string
-            let data = "";
-            // create writable stream that will append to data the chunks from gridfs.
             const writableStream = new Writable({
                 write(chunk, _encoding, callback) {
                     // data += chunk.toString("utf-8");
@@ -72,19 +62,35 @@ export class AppRepository {
                     callback();
                 },
             });
-            const file = gridFsBucket.openDownloadStreamByName(name)
-            .pipe(writableStream)
-            .on("finish", () => {
-                resolve({
-                    fileName: name,
-                    fileData: data,
-                    metaData: metadata?.pop()?.metadata
+        
+     
+            // hold base64 string
+            let data = "";
+            // create writable stream that will append to data the chunks from gridfs.
+ 
+            const openDowloadStream = (file) => {
+                gridFsBucket.openDownloadStream(file._id)
+                .pipe(writableStream)
+                .on("finish", () => {
+                    resolve({
+                        fileName: file.filename,
+                        metaData: file.metadata,
+                        uploadDate: file.uploadDate,
+                        fileData: data,
+                    });
+                })
+                .on("error", (err) => {
+                    reject(err.message);
                 });
+            }
+            const file = await gridFsBucket.find({
+                filename: fileName,
+                uploadDate: { $eq: new Date(uploadDate)}
             })
-            .on("error", (err) => {
-                reject(err.message);
-            });
-    });
+            .toArray().then(fileArray => {
+                openDowloadStream(fileArray.pop())
+            })
+        });
     }
 
     public async getAllFiles(fileType: string): Promise<Array<any>> {
@@ -93,7 +99,8 @@ export class AppRepository {
             const gridFsBucket = new GridFSBucket(dbHandle, {
                 bucketName: MONGO_BUCKET,
             });
-            const cursor = gridFsBucket.find({})
+            const filter = fileType !== '' ? {mimeType: fileType} : {$exists: true}
+            const cursor = gridFsBucket.find({metadata: filter})
             resolve(cursor.toArray())
         });
     }
@@ -169,4 +176,8 @@ export class AppRepository {
         throw new Error("Unable to delete file");
     }
 }
+}
+
+function ISODate(arg0: string): Date {
+    throw new Error("Function not implemented.");
 }
