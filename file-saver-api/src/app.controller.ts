@@ -2,6 +2,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Logger,
   Param,
@@ -38,7 +39,16 @@ export class AppController {
     ) {
     this.logger.log(`Filtering on: ${qp['uploadDate']}`)
     return await this.appService.getFile(params.id, qp['uploadDate']);
+  }
 
+  @Delete(':id')
+  async deleteFile(
+    @Param() params,
+    ) {
+    this.logger.log(`Deleting: ${params.id}`)
+    return {
+      response: await this.appService.deleteFile(params.id)
+    }
   }
 
   @Post('upload')
@@ -47,7 +57,6 @@ export class AppController {
     @Body() body: SampleDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-      this.logger.debug(file.mimetype)
       return {
         response: await this.appService.saveFile(file, body)
   }

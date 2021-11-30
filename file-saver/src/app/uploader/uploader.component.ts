@@ -24,7 +24,7 @@ export class UploaderComponent {
   removable = true;
   addOnBlur = true;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  tagList: string[] = ['Lease', 'Work-Order', 'Lead'];
+  tagList: string[] = [];
 
   constructor(
     private uploaderService: UploaderService) { }

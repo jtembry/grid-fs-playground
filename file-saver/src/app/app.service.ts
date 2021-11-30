@@ -35,14 +35,61 @@ export class AppService {
       this._files.next(c)})
   }
 
-  private log(filename: string, data: any) {
-    const message = `DownloaderService downloaded "${filename}" and got "${data}".`;
+  deleteFile(file: any) {
+    return this.http.delete(`${environment.apiUrl}/${file.id}`)
+      .pipe(
+        tap( // Log the result or error
+          data => this.log(file.filename, data, true),
+          error => this.logError(file.filename, error, true)
+        )
+      )
+  }
+
+    /**
+   * Method is use to download file.
+   * @param data - Array Buffer data
+   * @param type - type of the document.
+   */
+     downloadFile(data: any) {
+      const b64toBlob = (b64Data: string, contentType='', sliceSize=512) => {
+        const byteCharacters = atob(b64Data);
+        const byteArrays = [];
+
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+
+          const byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(byteArrays, {type: contentType});
+        return blob;
+      }
+
+      const blob = b64toBlob(data.fileData, data.metaData.mimeType)
+        let url = window.URL.createObjectURL(blob);
+        let pwa = window.open(url);
+        if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
+            alert( 'Please disable your Pop-up blocker and try again.');
+        }
+      }
+
+  private log(filename: string, data: any, isDelete = false) {
+    const message =  !isDelete
+    ? `Downloaded "${filename}".`
+    : `Deleted file ${filename}`
     this.messageService.add(message);
   }
 
-  private logError(filename: string, error: any) {
-    const message = `DownloaderService failed to download "${filename}"; got error "${error.message}".`;
-    console.error(message);
+  private logError(filename: string, error: any, isDelete = false) {
+    const message = !isDelete
+    ? `Failed to download "${filename}"; got error "${error.message}".`
+    : `Failed to delete "${filename}"; got error "${error.message}".`
     this.messageService.add(message);
   }
 }

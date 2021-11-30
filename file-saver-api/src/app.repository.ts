@@ -1,8 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
-import { createReadStream, createWriteStream } from "fs";
-import { MongoError, GridFSBucket, ObjectId } from "mongodb";
+import { GridFSBucket, ObjectId } from "mongodb";
 import { Connection } from "mongoose";
+import { resolve } from "path/posix";
 import { Readable, Writable } from "stream";
 
 export const MONGO_COLLECTION = "collection";
@@ -77,6 +77,7 @@ export class AppRepository {
                     reject(err.message);
                 });
             }
+            
             const file = await gridFsBucket.find({
                 filename: fileName,
                 uploadDate: { $eq: new Date(uploadDate)}
@@ -93,85 +94,27 @@ export class AppRepository {
             const gridFsBucket = new GridFSBucket(dbHandle, {
                 bucketName: MONGO_BUCKET,
             });
-            const filter = fileType !== '' ? {mimeType: fileType} : {$exists: true}
-            const cursor = gridFsBucket.find({metadata: filter})
+            const filter = fileType !== '' ? {"metadata.mimeType": fileType} : {}
+            console.log('filter', filter)
+            const cursor = gridFsBucket.find(filter)
             resolve(cursor.toArray())
         });
     }
 
-    // public async getBpmnFile(
-    //     fileId: string,
-    // ): Promise<{
-    //     fileName: string;
-    //     fileData: string;
-    // }> {
-    //     return new Promise<{
-    //         fileName: string;
-    //         fileData: string;
-    //     }>(async (resolve, reject) => {
-    //         const dbHandle = this.connection.db
-    //         const gridFsBucket = new GridFSBucket(dbHandle, {
-    //             bucketName: AOW_ADMIN_BUCKET,
-    //         });
-
-    //         const file = await gridFsBucket
-    //             .find({
-    //                 _id: new ObjectId(fileId),
-    //             })
-    //             .toArray();
-
-    //         let filename: string = "";
-    //         if (Array.isArray(file) && file.length > 0) {
-    //             filename = file[0].filename;
-    //         } else {
-    //             throw new Error("File not found");
-    //         }
-
-    //         // hold base64 string
-    //         let data = "";
-    //         // create writable stream that will append to data the chunks from gridfs.
-    //         const writableStream = new Writable({
-    //             write(chunk, _encoding, callback) {
-    //                 data += chunk.toString("base64");
-    //                 callback();
-    //             },
-    //         });
-    //         // open download stream and write data to write stream.
-    //         gridFsBucket
-    //             .openDownloadStream(new ObjectId(fileId))
-    //             .pipe(writableStream)
-    //             .on("finish", () => {
-    //                 resolve({
-    //                     fileName: filename,
-    //                     fileData: data,
-    //                 });
-    //             })
-    //             .on("error", (err) => {
-    //                 reject(err.message);
-    //             });
-    //     });
-    // }
-
-    public async deleteBpmnFile(fileId: string) {
-        try {
+    public async deleteFile(fileId: string) {
+        return new Promise (async (resolve, reject) => {
             const dbHandle = this.connection.db
 
             const gridFsBucket = new GridFSBucket(dbHandle, {
                 bucketName: MONGO_BUCKET,
             });
-
             gridFsBucket.delete(new ObjectId(fileId), (err) => {
                 if (err) {
-                    throw new Error("Unable to delete file");
+                    reject("Unable to delete file");
+                } else {
+                    resolve("File Deleted");
                 }
             });
-            throw new Error("Unable to delete file");
-        } catch (err) {
-        throw new Error("Unable to delete file");
+        })
     }
-}
-}
-
-function ISODate(arg0: string): Date {
-    throw new Error("Function not implemented.");
 }

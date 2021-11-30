@@ -19,4 +19,8 @@ export class AppService {
   async saveFile(file, body) {
     return await this.appRepository.saveFile(file, body.tags)
   }
+
+  async deleteFile(file) {
+    return await this.appRepository.deleteFile(file)
+  }
 }
