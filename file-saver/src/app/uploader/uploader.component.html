@@ -1,41 +1,41 @@
-<h2>Upload File</h2>
 <form [formGroup]="myForm" (ngSubmit)="submit()">
-  <div class="d-flex flex-row">
-    <div class="row">
+<div class="d-flex justify-content-around">
+  <div class="d-flex flex-column">
+    <div><h4><mat-icon style="margin:.75rem .5rem 0 0">cloud_upload</mat-icon>Upload</h4></div>
+    <div>
       <input
         formControlName="file"
         type="file"
+        class="btn btn-secondary"
         id="file"
         (change)="onFileChange($event)">
-    <div *ngIf="f.file.touched && f.file.invalid" class="alert alert-danger">
-      <div *ngIf="f.file.errors?.required">File is required.</div>
+    </div>
+    <div>
+      <mat-form-field style="width: 25vw" appearance="standard">
+        <mat-label>Add Tags:</mat-label>
+        <mat-chip-list #chipList aria-label="Tag selection" formControlName="tags">
+          <mat-chip *ngFor="let tag of tagList" [selectable]="selectable"
+                  [removable]="removable" (removed)="remove(tag)">
+            {{tag}}
+            <button matChipRemove *ngIf="removable">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input
+                id="name"
+                type="text"
+                class="form-control"
+                placeholder="New tag..."
+                [matChipInputFor]="chipList"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="addOnBlur"
+                (matChipInputTokenEnd)="add($event)">
+        </mat-chip-list>
+      </mat-form-field>
     </div>
   </div>
   <div>
-    <mat-form-field class="example-full-width" appearance="fill">
-      <mat-label>Add Tags:</mat-label>
-      <mat-chip-list #chipList aria-label="Tag selection" formControlName="tags">
-        <mat-chip *ngFor="let tag of tagList" [selectable]="selectable"
-                [removable]="removable" (removed)="remove(tag)">
-          {{tag}}
-          <button matChipRemove *ngIf="removable">
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-        <input
-              id="name"
-              type="text"
-              class="form-control"
-              placeholder="New tag..."
-              [matChipInputFor]="chipList"
-              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-              [matChipInputAddOnBlur]="addOnBlur"
-              (matChipInputTokenEnd)="add($event)">
-      </mat-chip-list>
-    </mat-form-field>
-  </div>
-  <div class="row">
-    <button class="btn btn-primary" type="submit">Submit</button>
+    <button mat-raised-button style="margin-top: 8rem" color="primary" type="submit">Save <mat-icon>save</mat-icon></button>
   </div>
 </div>
 </form>

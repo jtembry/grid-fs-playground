@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectConnection } from "@nestjs/mongoose";
 import { GridFSBucket, ObjectId } from "mongodb";
 import { Connection } from "mongoose";
+import { version } from "os";
 import { resolve } from "path/posix";
 import { Readable, Writable } from "stream";
 
@@ -27,12 +28,21 @@ export class AppRepository {
                 bucketName: MONGO_BUCKET,
             });
             // write data to grid fs
+
+            const filecheck = await gridFsBucket.find({
+                filename: file.originalname
+            })
+            .toArray()
+
+            let version = !!filecheck.length ? Math.max(...filecheck.map(f => f.metadata.version)) + 1 : 1;
+    
             stream
                 .pipe(gridFsBucket.openUploadStream(file.originalname, 
                     { 
                         metadata: {
                             'mimeType': file.mimetype,
-                            'tags': tags
+                            'tags': tags,
+                            'version': version
                         }
                     }
                 ))
@@ -95,7 +105,6 @@ export class AppRepository {
                 bucketName: MONGO_BUCKET,
             });
             const filter = fileType !== '' ? {"metadata.mimeType": fileType} : {}
-            console.log('filter', filter)
             const cursor = gridFsBucket.find(filter)
             resolve(cursor.toArray())
         });

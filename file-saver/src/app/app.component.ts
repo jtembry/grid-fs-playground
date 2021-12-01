@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
   }
   public file$ = this.service.files
   dataSource: any
-  displayedColumns: string[] = ['filename','filetype','tags','uploadDate','deleteButton'];
+  displayedColumns: string[] = ['filename','tags', 'version', 'filetype','deleteButton'];
   title = 'file-saver';
   contents: any;
   mimeTypes = mimeTypes;
@@ -39,7 +39,8 @@ export class AppComponent implements OnInit {
               mimeType: f.metadata.mimeType ??= '',
               tags: f.metadata.tags ??= '',
               uploadDate: f.uploadDate ??= '',
-              id: f._id ??= ''
+              id: f._id ??= '',
+              version: f.metadata.version
             })
         })
       this.dataSource = new MatTableDataSource(data)
